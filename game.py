@@ -127,7 +127,7 @@ class SimulationEngine:
 # STREAMLIT UI
 # =====================
 
-st.title("🏁 Rally Setup Challenge")
+st.title("🏁 Rally Setup Simulation")
 
 # ---------------------
 # STAGES
@@ -182,6 +182,12 @@ cars = {
 
 car_name = st.selectbox("Car", cars.keys())
 car = cars[car_name]
+
+st.subheader("🚗 Vehicle Characteristics")
+st.write(f"**Power:** {car.power} HP")
+st.write(f"**Weight:** {car.weight} kg")
+st.write(f"**Drivetrain:** {car.drivetrain}")
+st.write(f"**Reliability:** {car.reliability}")
 
 # ---------------------
 # SETUP
