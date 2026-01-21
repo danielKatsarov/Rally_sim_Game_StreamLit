@@ -180,7 +180,7 @@ cars = {
     "Mercedes-Benz 190E EVO II": Car("Mercedes-Benz 190E EVO II", 235, 1340, "RWD", 0.82),
     "Audi Quattro S1": Car("Audi Quattro S1", 450, 1350, "AWD", 0.9),
     "Lancia Delta Integrale": Car("Lancia Delta Integrale", 300, 1280, "AWD", 0.88),
-    "Lancia 037": Car("Lancia 037", 280, 1250, "RWD", 0.85),
+    "Lancia 037": Car("Lancia 037", 280, 1250, "RWD", 0.85)
 }
 
 car_name = st.selectbox("Car", cars.keys())
