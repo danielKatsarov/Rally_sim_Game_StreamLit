@@ -9,9 +9,9 @@ class Stage:
     def __init__(self, name, length_km, surface, roughness, speed, description):
         self.name = name
         self.length_km = length_km
-        self.surface = surface
-        self.roughness = roughness    # 0–1
-        self.speed = speed            # 0–1
+        self.surface = surface    # gravel / asphalt / snow
+        self.roughness = roughness  # 0–1
+        self.speed = speed          # 0–1
         self.description = description
 
 
@@ -20,7 +20,7 @@ class Car:
         self.name = name
         self.power = power
         self.weight = weight
-        self.drivetrain = drivetrain
+        self.drivetrain = drivetrain  # AWD / FWD / RWD
         self.reliability = reliability
 
 
@@ -58,63 +58,60 @@ def format_time(seconds: float) -> str:
 
 class SimulationEngine:
 
-    def run(self, stage: Stage, car: Car, setup: Setup) -> SimulationResult:
+    def calculate_time(self, stage: Stage, car: Car, setup: Setup, add_random: bool = True) -> SimulationResult:
+        """Calculate time based on setup and stage characteristics."""
         base_time = stage.length_km * 60 / (0.6 + stage.speed)
-
-        time_modifier = 1.0
-        risk = 0.0
+        penalty = 0.0
         notes = []
 
-        # Tires vs surface
+        # Suspension influence
+        if stage.roughness > 0.6:
+            if setup.suspension == "stiff":
+                penalty += 0.15
+                notes.append("Suspension too stiff for rough terrain")
+            elif setup.suspension == "soft":
+                penalty += 0.05
+                notes.append("Suspension too soft for rough terrain")
+        elif stage.speed > 0.7 and setup.suspension == "soft":
+            penalty += 0.1
+            notes.append("Suspension too soft for high-speed stage")
+
+        # Ride height influence
+        if stage.roughness > 0.6:
+            if setup.ride_height == "low":
+                penalty += 0.2
+                notes.append("Ride height too low")
+            elif setup.ride_height == "medium":
+                penalty += 0.05
+
+        # Tires influence
         if setup.tire_type != stage.surface:
-            time_modifier += 0.15
-            risk += 0.3
-            notes.append("Wrong tire choice for this surface")
-
-        # Suspension vs roughness
-        if stage.roughness > 0.65 and setup.suspension == "stiff":
-            time_modifier += 0.1
-            risk += 0.25
-            notes.append("Suspension too stiff for rough terrain")
-
-        if stage.speed > 0.7 and setup.suspension == "soft":
-            time_modifier += 0.08
-            risk += 0.2
-            notes.append("Suspension too soft for high-speed sections")
-
-        # Ride height
-        if stage.roughness > 0.6 and setup.ride_height == "low":
-            risk += 0.3
-            notes.append("Ride height too low for this stage")
+            penalty += 0.15
+            notes.append("Wrong tire choice")
 
         # Drivetrain influence
         if stage.surface in ["gravel", "snow"] and car.drivetrain != "AWD":
-            time_modifier += 0.1
-            risk += 0.2
+            penalty += 0.1
             notes.append("Non-AWD disadvantage on loose surface")
 
-        # Random factor
-        risk += random.uniform(0, 0.05)
+        # Add small random variation if needed
+        if add_random:
+            penalty += random.uniform(0, 0.05)
+
+        risk = min(penalty, 1.0)  # use penalty as proxy for risk
 
         # DNF logic
         if risk > 0.85:
-            return SimulationResult(
-                finished=False,
-                time_sec=None,
-                risk=round(risk, 2),
-                notes=notes + ["Crash / DNF"]
-            )
+            return SimulationResult(finished=False, time_sec=None, risk=risk, notes=notes + ["Crash / DNF"])
 
-        final_time = base_time * time_modifier
-        return SimulationResult(
-            finished=True,
-            time_sec=round(final_time, 2),
-            risk=round(risk, 2),
-            notes=notes
-        )
+        final_time = base_time * (1 + penalty)
+        return SimulationResult(finished=True, time_sec=round(final_time, 2), risk=round(risk, 2), notes=notes)
+
+    def run(self, stage: Stage, car: Car, setup: Setup) -> SimulationResult:
+        return self.calculate_time(stage, car, setup, add_random=True)
 
     def predict_optimal_time(self, stage: Stage) -> float:
-        """Estimate the best possible time using optimal setup."""
+        """Predict optimal time using ideal setup without randomness."""
         optimal_setup = Setup(
             suspension="medium",
             ride_height="medium",
@@ -122,7 +119,7 @@ class SimulationEngine:
             tire_type=stage.surface
         )
         optimal_car = Car("Optimal AWD", 300, 1300, "AWD", 0.95)
-        result = self.run(stage, optimal_car, optimal_setup)
+        result = self.calculate_time(stage, optimal_car, optimal_setup, add_random=False)
         return result.time_sec if result.finished else None
 
 
@@ -206,7 +203,7 @@ setup = Setup(
 engine = SimulationEngine()
 predicted_time_sec = engine.predict_optimal_time(stage)
 if predicted_time_sec:
-    st.info(f"Predicted optimal time for this stage: {format_time(predicted_time_sec)}")
+    st.info(f"Predicted optimal time: {format_time(predicted_time_sec)}")
 
 if st.button("▶️ Run Stage"):
     result = engine.run(stage, car, setup)
@@ -225,4 +222,5 @@ if st.button("▶️ Run Stage"):
         st.write("🔎 Analysis")
         for note in result.notes:
             st.write(f"- {note}")
+
 
