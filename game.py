@@ -9,9 +9,9 @@ class Stage:
     def __init__(self, name, length_km, surface, roughness, speed, description):
         self.name = name
         self.length_km = length_km
-        self.surface = surface    # gravel / asphalt / snow
-        self.roughness = roughness  # 0–1
-        self.speed = speed          # 0–1
+        self.surface = surface
+        self.roughness = roughness    # 0–1
+        self.speed = speed            # 0–1
         self.description = description
 
 
@@ -20,7 +20,7 @@ class Car:
         self.name = name
         self.power = power
         self.weight = weight
-        self.drivetrain = drivetrain  # AWD / FWD / RWD
+        self.drivetrain = drivetrain
         self.reliability = reliability
 
 
@@ -41,7 +41,7 @@ class SimulationResult:
 
 
 # =====================
-# TIME FORMATTING HELPER
+# TIME FORMATTING
 # =====================
 
 def format_time(seconds: float) -> str:
@@ -94,7 +94,7 @@ class SimulationEngine:
             notes.append("Non-AWD disadvantage on loose surface")
 
         # Random factor
-        risk += random.uniform(0, 0.1)
+        risk += random.uniform(0, 0.05)
 
         # DNF logic
         if risk > 0.85:
@@ -113,6 +113,18 @@ class SimulationEngine:
             notes=notes
         )
 
+    def predict_optimal_time(self, stage: Stage) -> float:
+        """Estimate the best possible time using optimal setup."""
+        optimal_setup = Setup(
+            suspension="medium",
+            ride_height="medium",
+            gearing="medium",
+            tire_type=stage.surface
+        )
+        optimal_car = Car("Optimal AWD", 300, 1300, "AWD", 0.95)
+        result = self.run(stage, optimal_car, optimal_setup)
+        return result.time_sec if result.finished else None
+
 
 # =====================
 # STREAMLIT UI
@@ -127,38 +139,14 @@ st.title("🏁 Rally Setup Challenge")
 st.header("1️⃣ Stage Selection")
 
 stages = {
-    "Rally Finland": Stage(
-        "Rally Finland", 10.5, "gravel", 0.4, 0.9,
-        "Very fast gravel stage with big jumps"
-    ),
-    "Monte Carlo": Stage(
-        "Monte Carlo", 8.2, "asphalt", 0.3, 0.6,
-        "Twisty mountain roads with variable grip"
-    ),
-    "Rally Sardinia": Stage(
-        "Rally Sardinia", 11.3, "gravel", 0.75, 0.55,
-        "Rough gravel, high tire wear"
-    ),
-    "Rally Wales": Stage(
-        "Rally Wales", 9.8, "gravel", 0.7, 0.5,
-        "Narrow, wet forest roads"
-    ),
-    "Rally Sweden": Stage(
-        "Rally Sweden", 12.0, "snow", 0.3, 0.75,
-        "Snow and ice, very high speeds"
-    ),
-    "Tour de Corse": Stage(
-        "Tour de Corse", 7.6, "asphalt", 0.2, 0.65,
-        "Very technical asphalt stage with tight corners"
-    ),
-    "Rally Mexico": Stage(
-        "Rally Mexico", 9.5, "gravel", 0.55, 0.7,
-        "High altitude, fast gravel roads"
-    ),
-    "Rally Argentina": Stage(
-        "Rally Argentina", 10.8, "gravel", 0.65, 0.6,
-        "Mixed gravel with water crossings"
-    )
+    "Rally Finland": Stage("Rally Finland", 10.5, "gravel", 0.4, 0.9, "Very fast gravel stage with big jumps"),
+    "Monte Carlo": Stage("Monte Carlo", 8.2, "asphalt", 0.3, 0.6, "Twisty mountain roads with variable grip"),
+    "Rally Sardinia": Stage("Rally Sardinia", 11.3, "gravel", 0.75, 0.55, "Rough gravel, high tire wear"),
+    "Rally Wales": Stage("Rally Wales", 9.8, "gravel", 0.7, 0.5, "Narrow, wet forest roads"),
+    "Rally Sweden": Stage("Rally Sweden", 12.0, "snow", 0.3, 0.75, "Snow and ice, very high speeds"),
+    "Tour de Corse": Stage("Tour de Corse", 7.6, "asphalt", 0.2, 0.65, "Very technical asphalt stage with tight corners"),
+    "Rally Mexico": Stage("Rally Mexico", 9.5, "gravel", 0.55, 0.7, "High altitude, fast gravel roads"),
+    "Rally Argentina": Stage("Rally Argentina", 10.8, "gravel", 0.65, 0.6, "Mixed gravel with water crossings")
 }
 
 stage_name = st.selectbox("Stage", stages.keys())
@@ -215,8 +203,12 @@ setup = Setup(
 # RUN SIMULATION
 # ---------------------
 
+engine = SimulationEngine()
+predicted_time_sec = engine.predict_optimal_time(stage)
+if predicted_time_sec:
+    st.info(f"Predicted optimal time for this stage: {format_time(predicted_time_sec)}")
+
 if st.button("▶️ Run Stage"):
-    engine = SimulationEngine()
     result = engine.run(stage, car, setup)
 
     st.subheader("📊 Result")
@@ -233,3 +225,4 @@ if st.button("▶️ Run Stage"):
         st.write("🔎 Analysis")
         for note in result.notes:
             st.write(f"- {note}")
+
