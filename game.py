@@ -2,7 +2,6 @@ import streamlit as st
 import random
 
 
-
 class Stage:
     def __init__(self, name, length_km, surface, roughness, speed, description):
         self.name = name
@@ -19,7 +18,7 @@ class Car:
         self.power = power
         self.weight = weight
         self.drivetrain = drivetrain  
-        self.reliability = reliability
+        self.reliability = reliability  
 
 
 class Setup:
@@ -38,6 +37,7 @@ class SimulationResult:
         self.notes = notes
 
 
+
 def format_time(seconds: float) -> str:
     minutes = int(seconds // 60)
     remaining_seconds = seconds % 60
@@ -49,12 +49,12 @@ def format_time(seconds: float) -> str:
 class SimulationEngine:
 
     def calculate_time(self, stage: Stage, car: Car, setup: Setup, add_random: bool = True) -> SimulationResult:
-        """Calculate time based on setup and stage characteristics."""
+        """Calculate time based on setup, stage, and reliability affecting only risk."""
         base_time = stage.length_km * 60 / (0.6 + stage.speed)
         penalty = 0.0
         notes = []
 
-     
+    
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
@@ -74,12 +74,12 @@ class SimulationEngine:
             elif setup.ride_height == "medium":
                 penalty += 0.05
 
-
+ 
         if setup.tire_type != stage.surface:
             penalty += 0.15
             notes.append("Wrong tire choice")
 
-     
+      
         if stage.surface in ["gravel", "snow"] and car.drivetrain != "AWD":
             penalty += 0.1
             notes.append("Non-AWD disadvantage on loose surface")
@@ -88,13 +88,14 @@ class SimulationEngine:
         if add_random:
             penalty += random.uniform(0, 0.05)
 
-        risk = min(penalty, 1.0)  
-
+        risk = min(penalty + (1 - car.reliability) * 0.2, 1.0)
 
         if risk > 0.85:
-            return SimulationResult(finished=False, time_sec=None, risk=risk, notes=notes + ["Crash / DNF"])
+            return SimulationResult(finished=False, time_sec=None, risk=risk, notes=notes + ["Crash / DNF due to reliability or setup"])
 
+     
         final_time = base_time * (1 + penalty)
+
         return SimulationResult(finished=True, time_sec=round(final_time, 2), risk=round(risk, 2), notes=notes)
 
     def run(self, stage: Stage, car: Car, setup: Setup) -> SimulationResult:
@@ -114,9 +115,7 @@ class SimulationEngine:
 
 
 
-
 st.title("🏁 Rally Setup Simulation")
-
 
 
 st.header("1️⃣ Stage Selection")
@@ -141,7 +140,6 @@ st.write(f"**Length:** {stage.length_km} km")
 st.write(f"**Roughness:** {stage.roughness}")
 st.write(f"**Average Speed:** {stage.speed}")
 st.write(f"**Description:** {stage.description}")
-
 
 
 st.header("2️⃣ Car Selection")
@@ -175,6 +173,7 @@ st.write(f"**Power:** {car.power} HP")
 st.write(f"**Weight:** {car.weight} kg")
 st.write(f"**Drivetrain:** {car.drivetrain}")
 st.write(f"**Reliability:** {car.reliability}")
+
 
 
 st.header("3️⃣ Car Setup")
