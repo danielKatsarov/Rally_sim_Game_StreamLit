@@ -9,9 +9,9 @@ class Stage:
     def __init__(self, name, length_km, surface, roughness, speed, description):
         self.name = name
         self.length_km = length_km
-        self.surface = surface
-        self.roughness = roughness    # 0–1
-        self.speed = speed            # 0–1
+        self.surface = surface    # gravel / asphalt / snow
+        self.roughness = roughness  # 0–1
+        self.speed = speed          # 0–1
         self.description = description
 
 
@@ -38,6 +38,18 @@ class SimulationResult:
         self.time_sec = time_sec
         self.risk = risk
         self.notes = notes
+
+
+# =====================
+# TIME FORMATTING HELPER
+# =====================
+
+def format_time(seconds: float) -> str:
+    minutes = int(seconds // 60)
+    remaining_seconds = seconds % 60
+    secs = int(remaining_seconds)
+    hundredths = int((remaining_seconds - secs) * 100)
+    return f"{minutes:02d}:{secs:02d}:{hundredths:02d}"
 
 
 # =====================
@@ -106,7 +118,7 @@ class SimulationEngine:
 # STREAMLIT UI
 # =====================
 
-st.title("🏁 Rally Stage Simulation")
+st.title("🏁 Rally Setup Challenge")
 
 # ---------------------
 # STAGES
@@ -121,7 +133,7 @@ stages = {
     ),
     "Monte Carlo": Stage(
         "Monte Carlo", 8.2, "asphalt", 0.3, 0.6,
-        "Twisty mountain roads, changing grip"
+        "Twisty mountain roads with variable grip"
     ),
     "Rally Sardinia": Stage(
         "Rally Sardinia", 11.3, "gravel", 0.75, 0.55,
@@ -137,7 +149,15 @@ stages = {
     ),
     "Tour de Corse": Stage(
         "Tour de Corse", 7.6, "asphalt", 0.2, 0.65,
-        "Very technical asphalt stage"
+        "Very technical asphalt stage with tight corners"
+    ),
+    "Rally Mexico": Stage(
+        "Rally Mexico", 9.5, "gravel", 0.55, 0.7,
+        "High altitude, fast gravel roads"
+    ),
+    "Rally Argentina": Stage(
+        "Rally Argentina", 10.8, "gravel", 0.65, 0.6,
+        "Mixed gravel with water crossings"
     )
 }
 
@@ -178,12 +198,6 @@ cars = {
 car_name = st.selectbox("Car", cars.keys())
 car = cars[car_name]
 
-st.subheader("🚗 Car Characteristics")
-st.write(f"**Power:** {car.power} HP")
-st.write(f"**Weight:** {car.weight} kg")
-st.write(f"**Drivetrain:** {car.drivetrain}")
-st.write(f"**Reliability:** {car.reliability}")
-
 # ---------------------
 # SETUP
 # ---------------------
@@ -197,7 +211,9 @@ setup = Setup(
     tire_type=st.selectbox("Tires", ["gravel", "asphalt", "snow"]),
 )
 
-
+# ---------------------
+# RUN SIMULATION
+# ---------------------
 
 if st.button("▶️ Run Stage"):
     engine = SimulationEngine()
@@ -206,7 +222,8 @@ if st.button("▶️ Run Stage"):
     st.subheader("📊 Result")
 
     if result.finished:
-        st.success(f"Stage completed in {result.time_sec} seconds")
+        formatted_time = format_time(result.time_sec)
+        st.success(f"Stage completed in {formatted_time}")
     else:
         st.error("❌ DNF – Stage not finished")
 
