@@ -178,6 +178,12 @@ cars = {
 car_name = st.selectbox("Car", cars.keys())
 car = cars[car_name]
 
+st.subheader("🚗 Car Characteristics")
+st.write(f"**Power:** {car.power} HP")
+st.write(f"**Weight:** {car.weight} kg")
+st.write(f"**Drivetrain:** {car.drivetrain}")
+st.write(f"**Reliability:** {car.reliability}")
+
 # ---------------------
 # SETUP
 # ---------------------
