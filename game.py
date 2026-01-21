@@ -106,7 +106,7 @@ class SimulationEngine:
 # STREAMLIT UI
 # =====================
 
-st.title("🏁 Rally Setup Challenge")
+st.title("🏁 Rally Stage Simulation")
 
 # ---------------------
 # STAGES
