@@ -1,17 +1,15 @@
 import streamlit as st
 import random
 
-# =====================
-# MODELS
-# =====================
+
 
 class Stage:
     def __init__(self, name, length_km, surface, roughness, speed, description):
         self.name = name
         self.length_km = length_km
-        self.surface = surface    # gravel / asphalt / snow
-        self.roughness = roughness  # 0–1
-        self.speed = speed          # 0–1
+        self.surface = surface   
+        self.roughness = roughness  
+        self.speed = speed         
         self.description = description
 
 
@@ -20,7 +18,7 @@ class Car:
         self.name = name
         self.power = power
         self.weight = weight
-        self.drivetrain = drivetrain  # AWD / FWD / RWD
+        self.drivetrain = drivetrain  
         self.reliability = reliability
 
 
@@ -40,10 +38,6 @@ class SimulationResult:
         self.notes = notes
 
 
-# =====================
-# TIME FORMATTING
-# =====================
-
 def format_time(seconds: float) -> str:
     minutes = int(seconds // 60)
     remaining_seconds = seconds % 60
@@ -51,10 +45,6 @@ def format_time(seconds: float) -> str:
     hundredths = int((remaining_seconds - secs) * 100)
     return f"{minutes:02d}:{secs:02d}:{hundredths:02d}"
 
-
-# =====================
-# SIMULATION ENGINE
-# =====================
 
 class SimulationEngine:
 
@@ -64,7 +54,7 @@ class SimulationEngine:
         penalty = 0.0
         notes = []
 
-        # Suspension influence
+     
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
@@ -76,7 +66,7 @@ class SimulationEngine:
             penalty += 0.1
             notes.append("Suspension too soft for high-speed stage")
 
-        # Ride height influence
+      
         if stage.roughness > 0.6:
             if setup.ride_height == "low":
                 penalty += 0.2
@@ -84,23 +74,23 @@ class SimulationEngine:
             elif setup.ride_height == "medium":
                 penalty += 0.05
 
-        # Tires influence
+
         if setup.tire_type != stage.surface:
             penalty += 0.15
             notes.append("Wrong tire choice")
 
-        # Drivetrain influence
+     
         if stage.surface in ["gravel", "snow"] and car.drivetrain != "AWD":
             penalty += 0.1
             notes.append("Non-AWD disadvantage on loose surface")
 
-        # Add small random variation if needed
+   
         if add_random:
             penalty += random.uniform(0, 0.05)
 
-        risk = min(penalty, 1.0)  # use penalty as proxy for risk
+        risk = min(penalty, 1.0)  
 
-        # DNF logic
+
         if risk > 0.85:
             return SimulationResult(finished=False, time_sec=None, risk=risk, notes=notes + ["Crash / DNF"])
 
@@ -123,15 +113,11 @@ class SimulationEngine:
         return result.time_sec if result.finished else None
 
 
-# =====================
-# STREAMLIT UI
-# =====================
+
 
 st.title("🏁 Rally Setup Simulation")
 
-# ---------------------
-# STAGES
-# ---------------------
+
 
 st.header("1️⃣ Stage Selection")
 
@@ -156,9 +142,7 @@ st.write(f"**Roughness:** {stage.roughness}")
 st.write(f"**Average Speed:** {stage.speed}")
 st.write(f"**Description:** {stage.description}")
 
-# ---------------------
-# CARS
-# ---------------------
+
 
 st.header("2️⃣ Car Selection")
 
@@ -192,9 +176,6 @@ st.write(f"**Weight:** {car.weight} kg")
 st.write(f"**Drivetrain:** {car.drivetrain}")
 st.write(f"**Reliability:** {car.reliability}")
 
-# ---------------------
-# SETUP
-# ---------------------
 
 st.header("3️⃣ Car Setup")
 
@@ -205,9 +186,6 @@ setup = Setup(
     tire_type=st.selectbox("Tires", ["gravel", "asphalt", "snow"]),
 )
 
-# ---------------------
-# RUN SIMULATION
-# ---------------------
 
 engine = SimulationEngine()
 predicted_time_sec = engine.predict_optimal_time(stage)
