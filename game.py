@@ -84,6 +84,12 @@ class SimulationEngine:
             penalty += 0.1
             notes.append("Non-AWD disadvantage on loose surface")
 
+        if stage.speed > 0.7 and setup.gearing == "short":
+            penalty += 0.08
+            notes.append("Short gearing slows down on high-speed stage")
+        elif stage.speed < 0.5 and setup.gearing == "long":
+            penalty += 0.08
+            notes.append("Long gearing hurts acceleration on tight/slow stage")
    
         if add_random:
             penalty += random.uniform(0, 0.05)
