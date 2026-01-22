@@ -54,7 +54,30 @@ class SimulationEngine:
         penalty = 0.0
         notes = []
 
+        
+        power_to_weight = car.power / car.weight               
+        baseline_ptw = 0.22  
+        ptw_diff = power_to_weight - baseline_ptw        
+        speed_factor = stage.speed  
+        ptw_bonus = -ptw_diff * speed_factor * 0.6
+        penalty += ptw_bonus
+        
+        if ptw_bonus < -0.03:
+            notes.append("Car performance advantage (power/weight)")
+        elif ptw_bonus > 0.03:
+            notes.append("Car lacks power for this stage")
+
+
+       if power_to_weight > 0.30:
+            risk += 0.1
+            notes.append("Car is very powerful and hard to control")
     
+        if stage.roughness > 0.6:
+            risk += 0.05
+            notes.append("High power on rough terrain increases risk")
+
+
+        
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
