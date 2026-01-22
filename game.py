@@ -170,12 +170,24 @@ st.write(stage.description)
 
 # --- Cars
 cars = {
-    "Subaru Impreza GC8": Car("Subaru", 280, 1250, "AWD", 0.9),
-    "Mitsubishi Evo IV": Car("Evo IV", 280, 1260, "AWD", 0.88),
-    "Audi Quattro S1": Car("Quattro S1", 450, 1350, "AWD", 0.9),
-    "Lancia Delta Integrale": Car("Delta", 300, 1280, "AWD", 0.88),
-    "Lancia 037": Car("037", 280, 1250, "RWD", 0.85),
-    "BMW E30": Car("E30", 220, 1200, "RWD", 0.85),
+    "Subaru Impreza GC8": Car("Subaru Impreza GC8", 280, 1250, "AWD", 0.9),
+    "Mitsubishi Lancer Evo IV": Car("Mitsubishi Lancer Evo IV", 280, 1260, "AWD", 0.88),
+    "Ford Focus RS": Car("Ford Focus RS", 300, 1350, "AWD", 0.85),
+    "Ford Fiesta": Car("Ford Fiesta", 200, 1180, "FWD", 0.9),
+    "Honda Civic EG6": Car("Honda Civic EG6", 170, 1050, "FWD", 0.92),
+    "Honda Civic EK9": Car("Honda Civic EK9", 185, 1070, "FWD", 0.9),
+    "Toyota Celica GT-Four": Car("Toyota Celica GT-Four", 300, 1350, "AWD", 0.87),
+    "Toyota Yaris GR": Car("Toyota Yaris GR", 261, 1280, "AWD", 0.9),
+    "Toyota Corolla GR": Car("Toyota Corolla GR", 300, 1470, "AWD", 0.88),
+    "Citroen C3": Car("Citroen C3", 280, 1230, "AWD", 0.9),
+    "Hyundai i20": Car("Hyundai i20", 280, 1210, "AWD", 0.9),
+    "BMW E30": Car("BMW E30", 220, 1200, "RWD", 0.85),
+    "BMW E36": Car("BMW E36", 240, 1300, "RWD", 0.84),
+    "BMW E46": Car("BMW E46", 260, 1400, "RWD", 0.83),
+    "Mercedes-Benz 190E EVO II": Car("Mercedes-Benz 190E EVO II", 235, 1340, "RWD", 0.82),
+    "Audi Quattro S1": Car("Audi Quattro S1", 450, 1350, "AWD", 0.9),
+    "Lancia Delta Integrale": Car("Lancia Delta Integrale", 300, 1280, "AWD", 0.88),
+    "Lancia 037": Car("Lancia 037", 280, 1250, "RWD", 0.85),
 }
 
 car_name = st.selectbox("Car", cars.keys())
