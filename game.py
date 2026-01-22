@@ -131,15 +131,15 @@ class SimulationEngine:
 
         # Setup penalties
         if stage.roughness > 0.6:
-        if setup.suspension == "stiff":
-            penalty += 0.15
-            notes.append("Suspension too stiff for rough terrain")
-        elif setup.suspension == "soft":
-            if stage.speed > 0.7:
-                penalty += 0.1
-                notes.append("Suspension too soft for high-speed rough stage")
-            else:
-                penalty += 0.0
+            if setup.suspension == "stiff":
+                penalty += 0.15
+                notes.append("Suspension too stiff for rough terrain")
+            elif setup.suspension == "soft":
+                if stage.speed > 0.7:
+                    penalty += 0.1
+                    notes.append("Suspension too soft for high-speed rough stage")
+                else:
+                    penalty += 0.0
 
 
         if stage.roughness > 0.6:
