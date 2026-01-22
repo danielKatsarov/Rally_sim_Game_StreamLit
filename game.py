@@ -67,17 +67,7 @@ class SimulationEngine:
         elif ptw_bonus > 0.03:
             notes.append("Car lacks power for this stage")
 
-
-       if power_to_weight > 0.30:
-            risk += 0.1
-            notes.append("Car is very powerful and hard to control")
-    
-        if stage.roughness > 0.6:
-            risk += 0.05
-            notes.append("High power on rough terrain increases risk")
-
-
-        
+      
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
@@ -119,6 +109,14 @@ class SimulationEngine:
 
         risk = min(penalty + (1 - car.reliability) * 0.2, 1.0)
 
+        if power_to_weight > 0.30:
+            risk += 0.1
+            notes.append("Car is very powerful and hard to control")
+    
+        if stage.roughness > 0.6:
+            risk += 0.05
+            notes.append("High power on rough terrain increases risk")
+        
         if risk > 0.85:
             return SimulationResult(finished=False, time_sec=None, risk=risk, notes=notes + ["Crash / DNF due to reliability or setup"])
 
