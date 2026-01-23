@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-# -------------------- Stage Classes --------------------
+
 class Stage:
     def __init__(self, name, length_km, roughness, speed, description):
         self.name = name
@@ -12,7 +12,6 @@ class Stage:
         self.surface = "Generic"
 
     def surface_penalty(self, car):
-        """Polymorphic method to calculate risk based on car drivetrain"""
         return 0.0
 
 
@@ -42,7 +41,7 @@ class SnowStage(Stage):
     def surface_penalty(self, car):
         return car.control_risk(self.surface)
 
-# -------------------- Car Classes --------------------
+
 class Car:
     def __init__(self, name, power, weight, reliability):
         self.name = name
@@ -52,7 +51,6 @@ class Car:
         self.drivetrain = "Generic"
 
     def control_risk(self, stage_type):
-        """Polymorphic method for risk based on drivetrain"""
         return 0.0
 
 
@@ -86,7 +84,7 @@ class AWDCar(Car):
     def control_risk(self, stage_type):
         return 0.0  
 
-# -------------------- Setup & Result --------------------
+
 class Setup:
     def __init__(self, suspension, ride_height, gearing, tire_type):
         self.suspension = suspension
@@ -102,7 +100,7 @@ class SimulationResult:
         self.risk = risk
         self.notes = notes
 
-# -------------------- Utils --------------------
+
 def format_time(seconds: float) -> str:
     minutes = int(seconds // 60)
     remaining_seconds = seconds % 60
@@ -110,7 +108,7 @@ def format_time(seconds: float) -> str:
     hundredths = int((remaining_seconds - secs) * 100)
     return f"{minutes:02d}:{secs:02d}:{hundredths:02d}"
 
-# -------------------- Simulation Engine --------------------
+
 class SimulationEngine:
 
     def calculate_time(self, stage: Stage, car: Car, setup: Setup, add_random: bool = True) -> SimulationResult:
@@ -118,7 +116,7 @@ class SimulationEngine:
         penalty = 0.0
         notes = []
 
-        # Power/weight 
+     
         power_to_weight = car.power / car.weight
         baseline_ptw = 0.22
         ptw_diff = power_to_weight - baseline_ptw
@@ -129,7 +127,7 @@ class SimulationEngine:
         elif ptw_bonus > 0.03:
             notes.append("Car lacks power for this stage")
 
-        # Setup penalties
+     
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
@@ -163,7 +161,7 @@ class SimulationEngine:
         if add_random:
             penalty += random.uniform(0, 0.05)
 
-        # Risk calculation
+        
         risk = min((1 - car.reliability) * 0.2 + stage.surface_penalty(car), 1.0)
         if power_to_weight > 0.30:
             risk += 0.1
@@ -187,10 +185,10 @@ class SimulationEngine:
         result = self.calculate_time(stage, optimal_car, optimal_setup, add_random=False)
         return result.time_sec if result.finished else None
 
-# -------------------- Streamlit UI --------------------
+
 st.title("🏁 Rally Setup Simulation")
 
-# 1️⃣ Stage Selection
+
 st.header("1️⃣ Stage Selection")
 stages = {
     "Rally Finland": GravelStage("Rally Finland", 10.5, 0.4, 0.9, "Very fast gravel stage with big jumps"),
@@ -212,7 +210,7 @@ st.write(f"**Roughness:** {stage.roughness}")
 st.write(f"**Average Speed:** {stage.speed}")
 st.write(f"**Description:** {stage.description}")
 
-# 2️⃣ Car Selection
+
 st.header("2️⃣ Car Selection")
 cars = {
     "Subaru Impreza GC8": AWDCar("Subaru Impreza GC8", 280, 1250, 0.9),
@@ -243,7 +241,7 @@ st.write(f"**Weight:** {car.weight} kg")
 st.write(f"**Drivetrain:** {car.drivetrain}")
 st.write(f"**Reliability:** {car.reliability}")
 
-# 3️⃣ Car Setup
+
 st.header("3️⃣ Car Setup")
 setup = Setup(
     suspension=st.selectbox("Suspension", ["soft", "medium", "stiff"]),
