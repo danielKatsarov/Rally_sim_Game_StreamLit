@@ -114,6 +114,7 @@ class SimulationEngine:
     def calculate_time(self, stage: Stage, car: Car, setup: Setup, add_random: bool = True) -> SimulationResult:
         base_time = stage.length_km * 60 / (0.6 + stage.speed)
         penalty = 0.0
+        setup_risk = 0.0
         notes = []
 
      
@@ -131,24 +132,30 @@ class SimulationEngine:
         if stage.roughness > 0.6:
             if setup.suspension == "stiff":
                 penalty += 0.15
+                setup_risk += 0.2
                 notes.append("Suspension too stiff for rough terrain")
             elif setup.suspension == "soft":
                 if stage.speed > 0.7:
                     penalty += 0.1
+                    setup_risk += 0.2
                     notes.append("Suspension too soft for high-speed rough stage")
                 else:
                     penalty += 0.0
+                    setup_risk += 0.0
 
 
         if stage.roughness > 0.6:
             if setup.ride_height == "low":
                 penalty += 0.2
+                setup_risk += 0.25
                 notes.append("Ride height too low")
             elif setup.ride_height == "medium":
                 penalty += 0.05
+                setup_risk += 0.02
 
         if setup.tire_type != stage.surface:
             penalty += 0.15
+            setup_risk += 0.2
             notes.append("Wrong tire choice")
 
         if stage.speed > 0.7 and setup.gearing == "short":
@@ -162,7 +169,13 @@ class SimulationEngine:
             penalty += random.uniform(0, 0.05)
 
         
-        risk = min((1 - car.reliability) * 0.2 + stage.surface_penalty(car), 1.0)
+        risk = (
+            (1 - car.reliability) * 0.25 +
+            stage.surface_penalty(car) +
+            setup_risk
+        )
+        risk = min(risk, 1.0)
+        
         if power_to_weight > 0.30:
             risk += 0.1
             notes.append("Car is very powerful and hard to control")
