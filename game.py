@@ -125,7 +125,7 @@ class SimulationEngine:
         ptw_bonus = -ptw_diff * stage.speed * 0.6
         penalty += ptw_bonus
         if ptw_bonus < -0.03:
-            notes.append("Car performance advantage (power/weight)")
+            notes.append("Power-to-weight advantage")
         elif ptw_bonus > 0.03:
             notes.append("Car lacks power for this stage")
 
