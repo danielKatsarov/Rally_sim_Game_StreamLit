@@ -183,7 +183,7 @@ class SimulationEngine:
             risk += 0.05
             notes.append("High power on rough terrain increases risk")
 
-        if risk > 0.85:
+        if risk > 0.75:
             return SimulationResult(False, None, round(risk,2), notes + ["Crash / DNF due to reliability or setup"])
 
         final_time = base_time * (1 + penalty)
